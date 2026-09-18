@@ -27,15 +27,17 @@ public class Conta {
     }
 
 
-    public void depositar(double valor){
+    public String depositar(double valor){
         saldo += valor;
+        return "Deposito realizado com sucesso!";
     }
 
-    public void sacar(double valor){
+    public String sacar(double valor){
         if(valor <= saldo) {
             saldo -= valor;
+            return "Saque realizado com sucesso!";
         }else{
-            System.out.println("Saldo insuficiente para saque.");
+            return "Saldo insuficiente para saque!";
         }
     }
 
