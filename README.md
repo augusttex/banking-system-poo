@@ -6,11 +6,15 @@ A simple banking system developed in Java as a **Object-Oriented Programming (OO
 
 ## 🚀 Features
 
-- ✅ Create a bank account with owner information
-- ✅ Deposit funds into the account
+- ✅ Create multiple bank accounts with account number (`nroConta`) and owner information
+- ✅ Deposit funds into a specific account
 - ✅ Withdraw funds with balance validation
+- ✅ Transfer funds between accounts with origin, destination, and balance validation
 - ✅ View account statement
-- ✅ Manager area to enable/disable banking operations
+- ✅ Manager area:
+  - View balances by account (account number, owner name, balance)
+  - View total balance across all customer accounts
+  - Enable/disable banking operations
 - ✅ Graphical interface using `JOptionPane`
 
 ---
@@ -60,10 +64,12 @@ Represents a bank account. Uses **composition** with `Proprietario`.
 
 | Member | Type | Description |
 |---|---|---|
+| `nroConta` | `String` | Account number |
 | `proprietario` | `Proprietario` | The account owner |
 | `saldo` | `double` | Current balance |
 | `depositar(double valor)` | `String` | Adds funds to the balance |
 | `sacar(double valor)` | `String` | Withdraws funds (validates balance) |
+| `transferir(Conta destino, double valor)` | `String` | Transfers funds to another account (validates balance) |
 | `extrato()` | `String` | Returns full account statement |
 
 ---
@@ -74,6 +80,7 @@ Main class containing the interactive menu and system logic.
 | Member | Type | Description |
 |---|---|---|
 | `operacoesHabilitadas` | `static boolean` | Enables/disables banking operations |
+| `contas` | `static List<Conta>` | Collection of registered bank accounts |
 | `main(String[] args)` | `void` | Application entry point |
 
 ---
@@ -85,8 +92,13 @@ Main class containing the interactive menu and system logic.
 2 - Withdraw
 3 - Deposit
 4 - View statement
-5 - Manager area (enable/disable operations)
-6 - Exit
+5 - Transfer
+6 - Manager area
+    1 - Balances per account
+    2 - Total balance of all clients
+    3 - Enable/disable operations
+    4 - Back
+7 - Exit
 ```
 
 ---
