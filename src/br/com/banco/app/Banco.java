@@ -1,6 +1,7 @@
 package br.com.banco.app;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.JOptionPane;
 import br.com.banco.model.ContaBancaria;
@@ -290,8 +291,9 @@ public class Banco {
                     "1 - Saldos por conta\n" +
                     "2 - Saldo total dos clientes\n" +
                     "3 - Atualizar Contas\n" +
-                    "4 - Habilitar/Desabilitar operacoes (Atual: " + statusPermissao + ")\n" +
-                    "5 - Voltar");
+                    "4 - Listar Contas\n" +
+                    "5 - Habilitar/Desabilitar operacoes (Atual: " + statusPermissao + ")\n" +
+                    "6 - Voltar");
 
             if (entrada == null) {
                 break;
@@ -315,6 +317,9 @@ public class Banco {
                     atualizarContas();
                     break;
                 case 4:
+                    listarContas();
+                    break;
+                case 5:
                     operacoesHabilitadas = !operacoesHabilitadas;
                     if (operacoesHabilitadas) {
                         JOptionPane.showMessageDialog(null, "Permissões liberadas!");
@@ -322,13 +327,13 @@ public class Banco {
                         JOptionPane.showMessageDialog(null, "Permissões bloqueadas!");
                     }
                     break;
-                case 5:
+                case 6:
                     break;
                 default:
                     JOptionPane.showMessageDialog(null, "Opcao invalida!");
                     break;
             }
-        } while (opcaoGerente != 5);
+        } while (opcaoGerente != 6);
     }
 
     private static void atualizarContas() {
@@ -376,5 +381,24 @@ public class Banco {
         JOptionPane.showMessageDialog(null,
                 "Total de contas: " + contas.size() + "\n" +
                 "Saldo total dos clientes: R$ " + String.format("%.2f", total));
+    }
+
+    private static void listarContas() {
+        if (contas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhuma conta cadastrada no sistema.");
+            return;
+        }
+        List<ContaBancaria> contasOrdenadas = new ArrayList<>(contas);
+        Collections.sort(contasOrdenadas);
+
+        StringBuilder relatorio = new StringBuilder("Contas cadastradas (ordem decrescente de saldo):\n\n");
+        for (ContaBancaria conta : contasOrdenadas) {
+            relatorio.append("Conta: ").append(conta.getNroConta())
+                    .append(" | Titular: ").append(conta.getProprietario().getNome())
+                    .append(" | CPF: ").append(conta.getProprietario().getCpf())
+                    .append(" | Saldo: R$ ").append(String.format("%.2f", conta.getSaldo()))
+                    .append("\n");
+        }
+        JOptionPane.showMessageDialog(null, relatorio.toString());
     }
 }

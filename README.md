@@ -15,6 +15,7 @@ A simple banking system developed in Java as a **Object-Oriented Programming (OO
   - View balances by account (account number, account type, owner name, balance)
   - View total balance across all customer accounts
   - Update all accounts (`Atualizar Contas`) with interest rate and monthly fee
+  - List all accounts (`Listar Contas`) sorted in descending order by balance (showing account number, owner name, CPF, and balance)
   - Enable/disable banking operations
 - ✅ Graphical interface using `JOptionPane`
 
@@ -115,8 +116,9 @@ Main class containing the interactive menu and system logic.
     1 - Balances per account
     2 - Total balance of all clients
     3 - Update accounts (Atualizar Contas)
-    4 - Enable/disable operations
-    5 - Back
+    4 - List accounts (Listar Contas - descending by balance)
+    5 - Enable/disable operations
+    6 - Back
 7 - Exit
 ```
 
@@ -144,6 +146,7 @@ Main class containing the interactive menu and system logic.
 | **Composition** | `ContaBancaria` has-a `Proprietario` |
 | **Static field** | `operacoesHabilitadas` and `contas` in `Banco` |
 | **Method override** | `toString()` in `Proprietario`; `sacar()`, `atualizar()`, `getTipoConta()` in subclasses |
+| **Interface & Sorting** | `Comparable<ContaBancaria>` with `Collections.sort` for descending balance order |
 
 ---
 

@@ -3,7 +3,7 @@ package br.com.banco.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ContaBancaria {
+public abstract class ContaBancaria implements Comparable<ContaBancaria> {
 
     private String nroConta;
     private Proprietario proprietario;
@@ -72,6 +72,11 @@ public abstract class ContaBancaria {
 
     protected String getDetalhesEspecificos() {
         return "";
+    }
+
+    @Override
+    public int compareTo(ContaBancaria outra) {
+        return Double.compare(outra.saldo, this.saldo);
     }
 
     public String extrato() {
