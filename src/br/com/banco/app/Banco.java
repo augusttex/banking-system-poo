@@ -3,13 +3,15 @@ package br.com.banco.app;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-import br.com.banco.model.Conta;
+import br.com.banco.model.ContaBancaria;
+import br.com.banco.model.ContaCorrente;
+import br.com.banco.model.ContaPoupanca;
 import br.com.banco.model.Proprietario;
 
 public class Banco {
 
     static boolean operacoesHabilitadas = false;
-    static List<Conta> contas = new ArrayList<>();
+    static List<ContaBancaria> contas = new ArrayList<>();
 
     public static void main(String[] args) {
         int opcaoInt = 0;
@@ -72,12 +74,12 @@ public class Banco {
         } while (resposta != JOptionPane.NO_OPTION && resposta != JOptionPane.CLOSED_OPTION && opcaoInt != 7);
     }
 
-    private static Conta buscarConta(String nroConta) {
+    private static ContaBancaria buscarConta(String nroConta) {
         if (nroConta == null) {
             return null;
         }
         String numeroBuscado = nroConta.trim();
-        for (Conta conta : contas) {
+        for (ContaBancaria conta : contas) {
             if (conta.getNroConta().equals(numeroBuscado)) {
                 return conta;
             }
@@ -93,12 +95,12 @@ public class Banco {
         return entrada.trim();
     }
 
-    private static Conta solicitarConta(String mensagem) {
+    private static ContaBancaria solicitarConta(String mensagem) {
         String nroConta = solicitarTextoNaoVazio(mensagem);
         if (nroConta == null) {
             return null;
         }
-        Conta conta = buscarConta(nroConta);
+        ContaBancaria conta = buscarConta(nroConta);
         if (conta == null) {
             JOptionPane.showMessageDialog(null, "Conta " + nroConta + " nao encontrada!");
         }
@@ -118,7 +120,40 @@ public class Banco {
         }
     }
 
+    private static Double solicitarValorNaoNegativo(String mensagem) {
+        Double valor = solicitarValor(mensagem);
+        if (valor == null) {
+            return null;
+        }
+        if (valor < 0) {
+            JOptionPane.showMessageDialog(null, "O valor nao pode ser negativo!");
+            return null;
+        }
+        return valor;
+    }
+
     private static void criarConta() {
+        String tipoEntrada = solicitarTextoNaoVazio("Escolha o tipo de conta:\n" +
+                "1 - Conta Poupanca\n" +
+                "2 - Conta Corrente");
+        if (tipoEntrada == null) {
+            JOptionPane.showMessageDialog(null, "Criacao de conta cancelada.");
+            return;
+        }
+
+        int tipoConta;
+        try {
+            tipoConta = Integer.parseInt(tipoEntrada);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Tipo de conta invalido!");
+            return;
+        }
+
+        if (tipoConta != 1 && tipoConta != 2) {
+            JOptionPane.showMessageDialog(null, "Tipo de conta invalido!");
+            return;
+        }
+
         String nroConta = solicitarTextoNaoVazio("Digite o numero da conta:");
         if (nroConta == null) {
             JOptionPane.showMessageDialog(null, "Operacao cancelada ou numero da conta invalido.");
@@ -139,8 +174,24 @@ public class Banco {
         }
 
         Proprietario proprietario = new Proprietario(nome.trim(), cpf.trim(), endereco.trim(), email.trim());
-        contas.add(new Conta(nroConta, proprietario, 0));
-        JOptionPane.showMessageDialog(null, "Conta " + nroConta + " criada com sucesso!");
+
+        if (tipoConta == 1) {
+            contas.add(new ContaPoupanca(nroConta, proprietario, 0));
+            JOptionPane.showMessageDialog(null, "Conta Poupanca " + nroConta + " criada com sucesso!");
+        } else {
+            Double limite = solicitarValorNaoNegativo("Digite o limite da conta corrente:");
+            if (limite == null) {
+                JOptionPane.showMessageDialog(null, "Criacao de conta cancelada.");
+                return;
+            }
+            Double mensalidade = solicitarValorNaoNegativo("Digite o valor da mensalidade da conta corrente:");
+            if (mensalidade == null) {
+                JOptionPane.showMessageDialog(null, "Criacao de conta cancelada.");
+                return;
+            }
+            contas.add(new ContaCorrente(nroConta, proprietario, 0, limite, mensalidade));
+            JOptionPane.showMessageDialog(null, "Conta Corrente " + nroConta + " criada com sucesso!");
+        }
     }
 
     private static void realizarSaque() {
@@ -152,7 +203,7 @@ public class Banco {
             JOptionPane.showMessageDialog(null, "Crie uma conta antes de sacar.");
             return;
         }
-        Conta conta = solicitarConta("Digite o numero da conta para saque:");
+        ContaBancaria conta = solicitarConta("Digite o numero da conta para saque:");
         if (conta == null) {
             return;
         }
@@ -172,7 +223,7 @@ public class Banco {
             JOptionPane.showMessageDialog(null, "Crie uma conta antes de depositar.");
             return;
         }
-        Conta conta = solicitarConta("Digite o numero da conta para deposito:");
+        ContaBancaria conta = solicitarConta("Digite o numero da conta para deposito:");
         if (conta == null) {
             return;
         }
@@ -192,7 +243,7 @@ public class Banco {
             JOptionPane.showMessageDialog(null, "Crie uma conta antes de consultar o extrato.");
             return;
         }
-        Conta conta = solicitarConta("Digite o numero da conta para consultar o extrato:");
+        ContaBancaria conta = solicitarConta("Digite o numero da conta para consultar o extrato:");
         if (conta == null) {
             return;
         }
@@ -208,11 +259,15 @@ public class Banco {
             JOptionPane.showMessageDialog(null, "E necessario ter pelo menos duas contas cadastradas para transferir.");
             return;
         }
-        Conta contaOrigem = solicitarConta("Digite o numero da conta de origem:");
+        ContaBancaria contaOrigem = solicitarConta("Digite o numero da conta de origem:");
         if (contaOrigem == null) {
             return;
         }
-        Conta contaDestino = solicitarConta("Digite o numero da conta de destino:");
+        if (!(contaOrigem instanceof ContaCorrente)) {
+            JOptionPane.showMessageDialog(null, "Apenas contas correntes podem realizar transferencias!");
+            return;
+        }
+        ContaBancaria contaDestino = solicitarConta("Digite o numero da conta de destino:");
         if (contaDestino == null) {
             return;
         }
@@ -224,7 +279,7 @@ public class Banco {
         if (valorTransferencia == null) {
             return;
         }
-        JOptionPane.showMessageDialog(null, contaOrigem.transferir(contaDestino, valorTransferencia));
+        JOptionPane.showMessageDialog(null, ((ContaCorrente) contaOrigem).transferir(contaDestino, valorTransferencia));
     }
 
     private static void abrirAreaGerente() {
@@ -234,8 +289,9 @@ public class Banco {
             String entrada = JOptionPane.showInputDialog("Area do Gerente - Escolha uma opcao:\n" +
                     "1 - Saldos por conta\n" +
                     "2 - Saldo total dos clientes\n" +
-                    "3 - Habilitar/Desabilitar operacoes (Atual: " + statusPermissao + ")\n" +
-                    "4 - Voltar");
+                    "3 - Atualizar Contas\n" +
+                    "4 - Habilitar/Desabilitar operacoes (Atual: " + statusPermissao + ")\n" +
+                    "5 - Voltar");
 
             if (entrada == null) {
                 break;
@@ -256,6 +312,9 @@ public class Banco {
                     exibirSaldoTotalClientes();
                     break;
                 case 3:
+                    atualizarContas();
+                    break;
+                case 4:
                     operacoesHabilitadas = !operacoesHabilitadas;
                     if (operacoesHabilitadas) {
                         JOptionPane.showMessageDialog(null, "Permissões liberadas!");
@@ -263,13 +322,34 @@ public class Banco {
                         JOptionPane.showMessageDialog(null, "Permissões bloqueadas!");
                     }
                     break;
-                case 4:
+                case 5:
                     break;
                 default:
                     JOptionPane.showMessageDialog(null, "Opcao invalida!");
                     break;
             }
-        } while (opcaoGerente != 4);
+        } while (opcaoGerente != 5);
+    }
+
+    private static void atualizarContas() {
+        if (contas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhuma conta cadastrada no sistema.");
+            return;
+        }
+        Double taxaPercentual = solicitarValorNaoNegativo("Digite a taxa de juros em % (ex: 5 para 5%):");
+        if (taxaPercentual == null) {
+            return;
+        }
+        double taxa = taxaPercentual / 100.0;
+        StringBuilder resumo = new StringBuilder("Contas atualizadas (taxa " + String.format("%.2f%%", taxaPercentual) + "):\n\n");
+        for (ContaBancaria conta : contas) {
+            conta.atualizar(taxa);
+            resumo.append("Conta: ").append(conta.getNroConta())
+                    .append(" (").append(conta.getTipoConta()).append(")")
+                    .append(" | Novo saldo: R$ ").append(String.format("%.2f", conta.getSaldo()))
+                    .append("\n");
+        }
+        JOptionPane.showMessageDialog(null, resumo.toString());
     }
 
     private static void exibirSaldosPorConta() {
@@ -278,8 +358,9 @@ public class Banco {
             return;
         }
         StringBuilder relatorio = new StringBuilder("Saldos por conta:\n\n");
-        for (Conta conta : contas) {
+        for (ContaBancaria conta : contas) {
             relatorio.append("Conta: ").append(conta.getNroConta())
+                    .append(" (").append(conta.getTipoConta()).append(")")
                     .append(" | Titular: ").append(conta.getProprietario().getNome())
                     .append(" | Saldo: R$ ").append(String.format("%.2f", conta.getSaldo()))
                     .append("\n");
@@ -289,7 +370,7 @@ public class Banco {
 
     private static void exibirSaldoTotalClientes() {
         double total = 0;
-        for (Conta conta : contas) {
+        for (ContaBancaria conta : contas) {
             total += conta.getSaldo();
         }
         JOptionPane.showMessageDialog(null,
